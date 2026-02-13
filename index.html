@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine for Lydia 💖</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle, #ffe6f0, #ffb3c6);
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #ff0066;
+    text-align: center;
+    flex-direction: column;
+  }
+
+  #message {
+    font-size: 2rem;
+    max-width: 80%;
+    z-index: 10;
+    position: relative;
+  }
+
+  button {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ff66aa;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #ff3399;
+  }
+
+  .heart, .flower {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    transform: rotate(-45deg);
+    animation: float 5s linear infinite;
+  }
+
+  .heart::before, .heart::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .heart::before { top: -10px; left: 0; }
+  .heart::after { left: 10px; top: 0; }
+
+  @keyframes float {
+    0% { transform: translateY(0) rotate(-45deg); opacity: 1; }
+    100% { transform: translateY(-600px) rotate(-45deg); opacity: 0; }
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="message"></div>
+<canvas id="confetti"></canvas>
+<div id="buttons"></div>
+
+<script>
+const messageEl = document.getElementById('message');
+const buttonsDiv = document.getElementById('buttons');
+
+// Messages to type first
+const messages = ["Hey Lydia, I love you.", "💖💖💖"];
+let msgIndex = 0;
+let charIndex = 0;
+
+// Typing effect
+function typeMessage() {
+  if(msgIndex < messages.length){
+    if(charIndex < messages[msgIndex].length){
+      messageEl.innerHTML += messages[msgIndex][charIndex];
+      charIndex++;
+      setTimeout(typeMessage, 100);
+    } else {
+      messageEl.innerHTML += "<br><br>";
+      charIndex = 0;
+      msgIndex++;
+      setTimeout(typeMessage, 500);
+    }
+  } else {
+    // Show click to reveal button
+    const revealBtn = document.createElement('button');
+    revealBtn.innerText = "Click to see a surprise ❤️";
+    revealBtn.onclick = showValentine;
+    buttonsDiv.appendChild(revealBtn);
+  }
+}
+
+// Show final Valentine message
+function showValentine() {
+  messageEl.innerHTML = "Lydia, will you be my Valentine?";
+  buttonsDiv.innerHTML = "";
+  
+  const yesBtn = document.createElement('button');
+  yesBtn.innerText = "Yes 💖";
+  yesBtn.onclick = celebrate;
+  
+  const noBtn = document.createElement('button');
+  noBtn.innerText = "No 💔";
+  noBtn.onclick = () => { alert("Oh... maybe next time 😢"); };
+
+  buttonsDiv.appendChild(yesBtn);
+  buttonsDiv.appendChild(noBtn);
+}
+
+// Celebration with flowers & hearts
+function celebrate() {
+  messageEl.innerHTML = "Yay! 💖💐 Let's celebrate our love!";
+  buttonsDiv.innerHTML = "";
+
+  // Make hearts and flowers
+  function createHeartOrFlower() {
+    const div = document.createElement('div');
+    const isFlower = Math.random() > 0.5;
+    div.className = isFlower ? 'flower' : 'heart';
+    div.style.left = Math.random() * window.innerWidth + 'px';
+    div.style.background = isFlower ? `hsl(${Math.random()*360}, 80%, 70%)` : `hsl(${Math.random()*360}, 80%, 60%)`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 6000);
+  }
+  setInterval(createHeartOrFlower, 200);
+}
+
+typeMessage();
+
+// Floating hearts in background
+function createHeart() {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.style.left = Math.random() * window.innerWidth + 'px';
+  heart.style.background = `hsl(${Math.random()*360},80%,60%)`;
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 5000);
+}
+setInterval(createHeart, 300);
+
+// Confetti
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const confettiPieces = [];
+const confettiCount = 150;
+for(let i=0;i<confettiCount;i++){
+  confettiPieces.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*6+2,
+    d: Math.random()*confettiCount,
+    color: `hsl(${Math.random()*360},80%,60%)`,
+    tilt: Math.random()*10-10,
+    tiltAngleIncremental: Math.random()*0.07+0.05,
+    tiltAngle:0
+  });
+}
+
+function drawConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<confettiCount;i++){
+    let p = confettiPieces[i];
+    ctx.beginPath();
+    ctx.lineWidth = p.r;
+    ctx.strokeStyle = p.color;
+    ctx.moveTo(p.x+p.tilt+p.r/2, p.y);
+    ctx.lineTo(p.x+p.tilt, p.y+p.tilt+p.r/2);
+    ctx.stroke();
+  }
+  updateConfetti();
+}
+
+function updateConfetti(){
+  for(let i=0;i<confettiCount;i++){
+    let p = confettiPieces[i];
+    p.tiltAngle += p.tiltAngleIncremental;
+    p.y += (Math.cos(p.d)+3+p.r/2)/2;
+    p.tilt = Math.sin(p.tiltAngle)*15;
+    if(p.y>canvas.height){ p.x=Math.random()*canvas.width; p.y=-20; }
+  }
+}
+
+setInterval(drawConfetti,20);
+
+window.addEventListener('resize',()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
